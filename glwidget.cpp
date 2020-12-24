@@ -1,165 +1,206 @@
-#include <QtOpenGL>
+#include <GL/glu.h>
+#include <QtWidgets>
+#include <QGLWidget>
+#include "glWidget.h"
+#include "Window.h"
+#include "objmodel.h"
+#include "texture.h"
+#include "utils.h"
+#include "vertexData.h"
+#include "math.h"
+#include "camera.h"
+#include <time.h> 
 
-#include <math.h>
+const static GLfloat normals[][3] = { {1., 0. ,0.}, {-1., 0., 0.}, {0., 0., 1.}, {0., 0., -1.}, {0, 1, 0}, {0, -1, 0} };
 
-#include "qtlogo.h"
-#include "glwidget.h"
-#include "window.h"
+// Setting up material properties
+typedef struct materialStruct {
+  GLfloat ambient[4];
+  GLfloat diffuse[4];
+  GLfloat specular[4];
+  GLfloat shininess;
+} materialStruct;
 
-#ifndef GL_MULTISAMPLE
-#define GL_MULTISAMPLE  0x809D
-#endif
+static materialStruct whiteShinyMaterials = {
+  { 1.0, 1.0, 1.0, 1.0},
+  { 1.0, 1.0, 1.0, 1.0},
+  { 1.0, 1.0, 1.0, 1.0},
+  100.0 
+};
 
-GLWidget::GLWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+static materialStruct brassMaterials = {
+  { 0.33, 0.22, 0.03, 1.0},
+  { 0.78, 0.57, 0.11, 1.0},
+  { 0.99, 0.91, 0.81, 1.0},
+  27.8 
+};
+
+glWidget::glWidget(QWidget *parent)
+    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent),  _angle(0.0)
 {
-/*The constructor provides default rotation angles for the scene, sets the pointer to the QtLogo object to null, and sets up some colors for later use.*/
-     logo = 0;
 
-     xRot = 0;
-     yRot = 0;
-     zRot = 0;
-
-     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
-     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 }
 
-// We also implement a destructor to release OpenGL-related resources when the widget is deleted.
-GLWidget::~GLWidget()
+glWidget::~glWidget()
 {
+
 }
 
-// We provide size hint functions to ensure that the widget is shown at a reasonable size.
-QSize GLWidget::minimumSizeHint() const
+void glWidget::initializeGL()
 {
-     return QSize(50, 50);
+	// set the widget background colour
+	glClearColor(0.3, 0.3, 0.3, 0.0);
 }
 
-QSize GLWidget::sizeHint() const
+void glWidget::setMoveLeft()
 {
-     return QSize(400, 400);
+	camera.mbMoveLeft = true;
+	// printf("Here setMoveLeft!");
 }
 
-static void qNormalizeAngle(int &angle)
+void glWidget::setMoveRight()
 {
-     while (angle < 0)
-         angle += 360 * 16;
-     while (angle > 360 * 16)
-         angle -= 360 * 16;
+	camera.mbMoveRight = true;
+	// printf("Here setMoveRight!");
 }
 
-// The widget provides three slots that enable other components in the example to change the orientation of the scene.
-void GLWidget::setXRotation(int angle)
+void glWidget::paintGL()
 {
-     qNormalizeAngle(angle);
 
-     // In the above slot, the xRot variable is updated only if the new angle is different to the old one.
-     if (angle != xRot) {
-         xRot = angle;
-	  
-         // xRotationChanged() signal is emitted to allow other components to be updated.
-         emit xRotationChanged(angle);
+	//draw scene
+	glLoadIdentity();
+
+	// clear the widget
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//需要在loadIdentity之后，紧接着就初始化camera
+	//set up camera 每一帧都设置一个camera --> 更新摄像机
+	printf("camera.Update: %d",camera.mbMoveLeft);
+	camera.Update(); // 0.016f
+
+	//set model view matrix
+	gluLookAt(camera.mPos.x, camera.mPos.y, camera.mPos.z,
+		camera.mViewCenter.x, camera.mViewCenter.y, camera.mViewCenter.z,
+		camera.mUp.x, camera.mUp.y, camera.mUp.z);
+
+	// Position light
+	glPushMatrix();
+
+	// You must set the matrix mode to model view directly before enabling the depth test
+	glMatrixMode(GL_MODELVIEW); 
+
+	// Draw the Center tower
+	// glScalef(0.1f,0.1f,0.1f);
+	// glTranslatef(0,-1.,0.);
+
+	this->draw();
+	glPopMatrix();
+
+	// flush to screen
+	glFlush();
+
+}
+
+
+
+// called every time the widget is resized
+void glWidget::resizeGL(int width, int height)
+{
+	glViewport(0, 0, width, height);
+
+	glEnable(GL_LIGHTING); // enable lighting in general
+	glEnable(GL_LIGHT0);   // each light source must also be enabled
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+
+	// glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-4.0, 4.0, -4.0, 4.0, -4.0, 4.0);
+
+}
+
+void glWidget::draw(){
+	// 类的构建
+	Texture texture;
+	//texture.InitBMP("extra/earth.bmp");//初始化成为一个opengl的文件
+        texture.Init("extra/Mercator-projection.ppm",2);//初始化成为一个opengl的文件
+
+	ObjModel model;
+	model.Init("extra/Sphere.obj"); // 解码出来
+
+   	//init light
+	float blackColor[] = { 0.0f,0.0f,0.0f,1.0f };
+	float whiteColor[] = { 1.0f,1.0f,1.0f,1.0f };
+	float lightPos[] = { 0.0f,1.0f,0.0f,0.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, whiteColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteColor);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, whiteColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);//direction light,point,spot
+
+	float blackMat[] = { 0.0f,0.0f,0.0f,1.0f };
+	float ambientMat[] = { 0.1f,0.1f,0.1f,1.0f };
+	float diffuseMat[] = { 0.4f,0.4f,0.4f,1.0f };
+	float specularMat[] = { 0.9f,0.9f,0.9f,1.0f };
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseMat);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, blackMat);
+
+	glMaterialf(GL_FRONT, GL_SHININESS,128.0f); // 镜面光
+
+        //draw scene
+	glLoadIdentity();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture.mTextureID);
+	model.Draw(); // 实现画模型
+}
+
+
+void glWidget::updateAngle(){
+  _angle += 1.0;
+  this->repaint();
+}
 	
-	 // Then the widget's updateGL() handler function is called
-         updateGL();
-     }
-}
 
-void GLWidget::setYRotation(int angle)
-{
-     qNormalizeAngle(angle);
-     if (angle != yRot) {
-         yRot = angle;
-         emit yRotationChanged(angle);
-         updateGL();
-     }
-}
 
-void GLWidget::setZRotation(int angle)
-{
-     qNormalizeAngle(angle);
-     if (angle != zRot) {
-         zRot = angle;
-         emit zRotationChanged(angle);
-         updateGL();
-     }
-}
 
-// The initializeGL() function is used to perform useful initialization tasks that are needed to render the 3D scene.
-void GLWidget::initializeGL()
-{
-     // Clear the color with xxx.
-     qglClearColor(qtPurple.dark());
 
-     logo = new QtLogo(this, 64);
-     logo->setColor(qtGreen.dark());
 
-     glEnable(GL_DEPTH_TEST);
-     glEnable(GL_CULL_FACE);
-     glShadeModel(GL_SMOOTH);
-     glEnable(GL_LIGHTING);
-     glEnable(GL_LIGHT0);
-     glEnable(GL_MULTISAMPLE);
-     
-     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-}
 
-// The paintGL() function is used to paint the contents of the scene onto the widget.
-// In this example, we clear the widget using the background color that we defined in the initializeGL() function
-// set up the frame of reference for the geometry we want to display, 
-// and call the draw method of the QtLogo object to render the scene.
-void GLWidget::paintGL()
-{
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-     glLoadIdentity();
-     glTranslatef(0.0, 0.0, -10.0);
-     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-     logo->draw();
-}
 
-// The resizeGL() function is used to ensure that the OpenGL implementation renders the scene onto a viewport that matches the size of the widget, 
-// using the correct transformation from 3D coordinates to 2D viewport coordinates.
-void GLWidget::resizeGL(int width, int height)
-{
-     int side = qMin(width, height);
-     glViewport((width - side) / 2, (height - side) / 2, side, side);
 
-     glMatrixMode(GL_PROJECTION);
-     glLoadIdentity();
 
- #ifdef QT_OPENGL_ES_1
-     glOrthof(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
- #else
-     glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
- #endif
-     glMatrixMode(GL_MODELVIEW);
-}
 
-// The mousePressEvent() function simply records the position of the mouse when a button is initially pressed.
-void GLWidget::mousePressEvent(QMouseEvent *event)
-{
-     lastPos = event->pos();
-}
 
-// The mouseMoveEvent() function uses the previous location of the mouse cursor to determine how much the object in the scene should be rotated, 
-// and in which direction.
-void GLWidget::mouseMoveEvent(QMouseEvent *event)
-{
-     int dx = event->x() - lastPos.x();
-     int dy = event->y() - lastPos.y();
 
-     if (event->buttons() & Qt::LeftButton) {
-         setXRotation(xRot + 8 * dy);
-         setYRotation(yRot + 8 * dx);
-     } else if (event->buttons() & Qt::RightButton) {
-         setXRotation(xRot + 8 * dy);
-         setZRotation(zRot + 8 * dx);
-     }
-     lastPos = event->pos();
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

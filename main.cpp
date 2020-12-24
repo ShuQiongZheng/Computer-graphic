@@ -1,22 +1,32 @@
 #include <QApplication>
-#include <QDesktopWidget>
-
-#include "qtlogo.h"
-#include "glwidget.h"
-#include "window.h"
+#include <QVBoxLayout>
+#include "glWidget.h"
+#include "Window.h"
+#include "objmodel.h"
+#include "texture.h"
+#include "utils.h"
+#include "vertexData.h"
 
 int main(int argc, char *argv[])
 {
      QApplication app(argc, argv);
-     Window window;
-     window.resize(window.sizeHint());
+     Window *window = new Window(NULL);
 
-     int desktopArea = QApplication::desktop()->width() *
-                      QApplication::desktop()->height();
-     int widgetArea = window.width() * window.height();
-     if (((float)widgetArea / (float)desktopArea) < 0.75f)
-         window.show();
-     else
-         window.showMaximized();
-     return app.exec();
-}
+     // resize the window
+     window->resize(512, 612);
+
+     // show the label
+     window->show();
+
+     // start it running
+     app.exec();
+
+     // clean up
+     //	delete controller;
+     delete window;
+	
+     // return to caller 
+     return 0;
+ 
+     } // main()
+
