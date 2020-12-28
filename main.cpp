@@ -15,11 +15,13 @@ int main(int argc, char *argv[])
      // resize the window
      window->resize(512, 612);
 
+
      // show the label
      window->show();
 
      // start it running
      app.exec();
+
 
      // clean up
      //	delete controller;

@@ -38,16 +38,20 @@ Window::Window(QWidget *parent)
 	ySlider = createSlider();
 
 	// If the slider's value changed, then we execute the function -> in SLOT
-	connect(xSlider, SIGNAL(valueChanged(int)), cubeWidget, SLOT(setMoveLeft()));
+    connect(xSlider, SIGNAL(valueChanged(int)), cubeWidget, SLOT(setMoveLeft(int)));
 
-	connect(ySlider, SIGNAL(valueChanged(int)), cubeWidget, SLOT(setMoveRight()));
+    connect(ySlider, SIGNAL(valueChanged(int)), cubeWidget, SLOT(setMoveRight(int)));
 
 	windowLayout->addWidget(cubeWidget);
 	windowLayout->addWidget(xSlider);
 	windowLayout->addWidget(ySlider);
 
-	xSlider->setValue(15 * 16);
-	ySlider->setValue(345 * 16);
+    xSlider->setMinimum(0);
+    xSlider->setMaximum(100);
+    ySlider->setMinimum(0);
+    ySlider->setMaximum(100);
+    xSlider->setValue(50);
+    ySlider->setValue(50);
 
 	} // constructor
 

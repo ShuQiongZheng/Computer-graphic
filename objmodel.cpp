@@ -176,9 +176,9 @@ void ObjModel::Draw()
 
 	glPushMatrix();
 	
-	glTranslatef(0.0f, 0.0f, -1.0f);
+	glTranslatef(0.0f, 0.0f, -3.0f);
 	glRotatef(angle, 0.0f, 1.0f, 0.0f);
-	glScalef(-0.5f, -0.5f, -0.5f);
+	// glScalef(0.01f, 0.01f, 0.01f);
 
 	// 面都是由三角形构成的！
 	glBegin(GL_TRIANGLES);

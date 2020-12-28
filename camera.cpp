@@ -2,10 +2,12 @@
 #include "math.h"
 #include "vector3f.h"
 #include <GL/glu.h>
+#include <cstdio>
+#include <QDebug>
 
-Camera::Camera() :mPos(1.0f, 1.0f, 1.0f),
+Camera::Camera() :mPos(10.0f, 10.0f, 10.0f),
 mViewCenter(0.0f, 0.0f, 0.0f),
-mUp(0.0f, 1.0f, 0.0f),
+mUp(-1.0f, 1.0f, -1.0f),
 mbMoveLeft(false),
 mbMoveRight(false),
 mbMoveForward(false),
@@ -15,47 +17,36 @@ mbMoveBackward(false)
 }
 
 // Update the Camera position 
-void Camera::Update()
+void Camera::Update(float deltaTime)
 {
+
+	qDebug()<<"Update";
+
 	//update everything
-	float deltaTime = 1.0f;
-	float moveSpeed = 100.0f;
-	if (mbMoveLeft)
-	{
-		//left direction vector
-		Vector3f leftDirection(-1.0f,0.0f,0.0f);
-		leftDirection.Normalize();
-		mPos = mPos + leftDirection*moveSpeed*deltaTime;
-		mViewCenter = mViewCenter + leftDirection*moveSpeed*deltaTime;
-	}
-	if (mbMoveRight)
-	{
-		//right direction vector
-		Vector3f rightDirection(1.0f, 0.0f, 0.0f);
-		rightDirection.Normalize();
-		mPos = mPos + rightDirection*moveSpeed*deltaTime;
-		mViewCenter = mViewCenter + rightDirection*moveSpeed*deltaTime;
-	}
-	if (mbMoveForward)
-	{
-		//left direction vector
-		Vector3f forwardDirection(0.0f, 0.0f, -1.0f);
-		forwardDirection.Normalize();
-		mPos = mPos + forwardDirection*moveSpeed*deltaTime;
-		mViewCenter = mViewCenter + forwardDirection*moveSpeed*deltaTime;
-	}
-	if (mbMoveBackward)
-	{
-		//right direction vector
-		Vector3f backwardDirection(0.0f, 0.0f, 1.0f);
-		backwardDirection.Normalize();
-		mPos = mPos + backwardDirection*moveSpeed*deltaTime;
-		mViewCenter = mViewCenter + backwardDirection*moveSpeed*deltaTime;
-	}
+	float moveSpeed = 1.0f;
+
+	printf("Here setMoveLeft!");
+	qDebug()<<"left tranlation";
+
+	//left direction vector
+	Vector3f leftDirection(1.0f,0.0f,0.0f);
+	leftDirection.Normalize();
+	//mPos.x= (translateX-50);
+
+
+	printf("Here setMoveRight!");
+
+	//right direction vector
+	Vector3f rightDirection(0.0f, 1.0f, 0.0f);
+	rightDirection.Normalize();
+
+	mPos = Vector3f(10.0f, 10.0f, 10.0f) + leftDirection*moveSpeed*(translateX-50) + rightDirection*moveSpeed*(translateY-50);
+	mViewCenter = Vector3f(0.0f, 0.0f, 0.0f)  + leftDirection*moveSpeed*(translateX-50) + 	rightDirection*moveSpeed*(translateY-50);
+
+	qDebug()<<"mPos"<<mPos.x<<mPos.y<<mPos.z <<"mViewCenter"<< mViewCenter.x<<mViewCenter.y<<mViewCenter.z;
+
 	//set model view matrix
-	gluLookAt(mPos.x, mPos.y, mPos.z,
-		mViewCenter.x, mViewCenter.y, mViewCenter.z,
-		mUp.x, mUp.y, mUp.z);
+	gluLookAt(mPos.x, mPos.y, mPos.z,mViewCenter.x, mViewCenter.y, mViewCenter.z,mUp.x, mUp.y, mUp.z);
 }
 
 
