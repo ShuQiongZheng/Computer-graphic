@@ -5,6 +5,7 @@
 
 #include <QGLWidget>
 #include "camera.h"
+#include "planet.h"
 
 class glWidget : public QGLWidget
 {
@@ -15,7 +16,6 @@ public:
 
 public slots:
     // called by the timer in the main window
-    void updateAngle();
     void setMoveLeft( int value);
     void setMoveRight(int value);
 
@@ -24,18 +24,18 @@ protected:
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
+    void wheelEvent(QWheelEvent *event);
 
 
 
 private:
-    void drawAnimal();
-    void CenterTower();
-    void top(double base,double x,double y);
-    void diamond();
     double _angle;
 
     Camera camera;
     QTimer * m_timer;
+    planet * m_earth;
+    planet * m_sun;
+    planet * moon;
 
 };
 

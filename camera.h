@@ -8,6 +8,7 @@ public:
 public:
     int translateX = 50;
     int translateY = 50;
+    int distance = 50;
 
 	// Camera Position: mPos
 	// Camera ViewCenter: mViewCenter

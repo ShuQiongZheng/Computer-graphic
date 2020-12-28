@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "vertexData.h"
 
+
 int main(int argc, char *argv[])
 {
      QApplication app(argc, argv);
@@ -21,6 +22,8 @@ int main(int argc, char *argv[])
 
      // start it running
      app.exec();
+
+
 
 
      // clean up
