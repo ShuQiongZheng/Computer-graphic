@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_glWidget_t {
-    QByteArrayData data[5];
-    char stringdata0[47];
+    QByteArrayData data[6];
+    char stringdata0[53];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,11 +35,12 @@ QT_MOC_LITERAL(0, 0, 8), // "glWidget"
 QT_MOC_LITERAL(1, 9, 11), // "updateAngle"
 QT_MOC_LITERAL(2, 21, 0), // ""
 QT_MOC_LITERAL(3, 22, 11), // "setMoveLeft"
-QT_MOC_LITERAL(4, 34, 12) // "setMoveRight"
+QT_MOC_LITERAL(4, 34, 5), // "value"
+QT_MOC_LITERAL(5, 40, 12) // "setMoveRight"
 
     },
     "glWidget\0updateAngle\0\0setMoveLeft\0"
-    "setMoveRight"
+    "value\0setMoveRight"
 };
 #undef QT_MOC_LITERAL
 
@@ -58,13 +59,13 @@ static const uint qt_meta_data_glWidget[] = {
 
  // slots: name, argc, parameters, tag, flags
        1,    0,   29,    2, 0x0a /* Public */,
-       3,    0,   30,    2, 0x0a /* Public */,
-       4,    0,   31,    2, 0x0a /* Public */,
+       3,    1,   30,    2, 0x0a /* Public */,
+       5,    1,   33,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,    4,
+    QMetaType::Void, QMetaType::Int,    4,
 
        0        // eod
 };
@@ -76,12 +77,11 @@ void glWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->updateAngle(); break;
-        case 1: _t->setMoveLeft(); break;
-        case 2: _t->setMoveRight(); break;
+        case 1: _t->setMoveLeft((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 2: _t->setMoveRight((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject glWidget::staticMetaObject = {
