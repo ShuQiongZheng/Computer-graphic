@@ -1,12 +1,12 @@
-#include "Window.h"
+#include "glWidget.h"
 #include <QVBoxLayout>
 #include <QtWidgets>
-#include "glWidget.h"
 #include "objmodel.h"
 #include "texture.h"
 #include "utils.h"
 #include "vertexData.h"
 #include "camera.h"
+#include "Window.h"
 
 // constructor / destructor
 Window::Window(QWidget *parent)
@@ -46,12 +46,12 @@ Window::Window(QWidget *parent)
 	windowLayout->addWidget(xSlider);
 	windowLayout->addWidget(ySlider);
 
-    xSlider->setMinimum(0);
-    xSlider->setMaximum(100);
-    ySlider->setMinimum(0);
-    ySlider->setMaximum(100);
-    xSlider->setValue(50);
-    ySlider->setValue(50);
+	xSlider->setMinimum(0);
+	xSlider->setMaximum(100);
+	ySlider->setMinimum(0);
+	ySlider->setMaximum(100);
+	xSlider->setValue(50);
+	ySlider->setValue(50);
 
 	} // constructor
 

@@ -7,7 +7,6 @@
 #include <QTimer>
 #include <QBoxLayout>
 #include "glWidget.h"
-#include "camera.h"
 
 // The Window class is used as a container for the GLWidget used to display the scene.
 class QSlider;
@@ -32,6 +31,7 @@ public:
 
 	// beneath that, the main widget
 	glWidget *cubeWidget;
+
 	// and a slider for the number of vertices
 	QSlider *nVerticesSlider;
 

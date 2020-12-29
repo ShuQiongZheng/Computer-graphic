@@ -1,5 +1,7 @@
-#pragma once
-#include <Window.h>
+#ifndef __GL_POLYGON_texture_H__
+#define __GL_POLYGON_texture_H__ 1
+#include <GL/glu.h>
+#include <QImage>
 
 const unsigned int N_COLOR   = 3;
 const unsigned int N_X_IMAGE = 128;
@@ -8,7 +10,7 @@ const unsigned int N_Y_IMAGE = 128;
 class Texture
 {
 public:
-	GLuint mTextureID;// 告诉显卡要处理的纹理的名字叫什么 --> TextureID 
+	GLuint mTextureID;// What is the name of the texture to be processed --> TextureID 
 	void Init(const char* imagePath,int temp);
 	void DecodePPM(const char* imagePath);
 
@@ -21,3 +23,4 @@ private:
 
 };
 
+#endif

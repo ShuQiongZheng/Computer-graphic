@@ -12,10 +12,10 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -isystem /usr/include/libdrm -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+CXXFLAGS      = -pipe -O2 -std=gnu++11 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+INCPATH       = -I. -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtOpenGL -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -isystem /usr/include/libdrm -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -38,7 +38,7 @@ DISTNAME      = demo1.0.0
 DISTDIR = /home/ubuntu/Desktop/demo\ 2/demo/.tmp/demo1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS) -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -lGLU -lglut -lQt5OpenGL -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -55,6 +55,7 @@ SOURCES       = camera.cpp \
 		main.cpp \
 		objmodel.cpp \
 		planet.cpp \
+		skybox.cpp \
 		texture.cpp \
 		utils.cpp \
 		vector3f.cpp \
@@ -65,6 +66,7 @@ OBJECTS       = camera.o \
 		main.o \
 		objmodel.o \
 		planet.o \
+		skybox.o \
 		texture.o \
 		utils.o \
 		vector3f.o \
@@ -136,6 +138,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf \
+		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/uic.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qmake_use.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/file_copies.prf \
@@ -147,6 +150,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		glWidget.h \
 		objmodel.h \
 		planet.h \
+		skybox.h \
 		texture.h \
 		utils.h \
 		vector3f.h \
@@ -156,6 +160,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		main.cpp \
 		objmodel.cpp \
 		planet.cpp \
+		skybox.cpp \
 		texture.cpp \
 		utils.cpp \
 		vector3f.cpp \
@@ -237,6 +242,7 @@ Makefile: demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /u
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf \
+		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/uic.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qmake_use.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/file_copies.prf \
@@ -245,6 +251,8 @@ Makefile: demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /u
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		demo.pro \
+		/usr/lib/x86_64-linux-gnu/libQt5OpenGL.prl \
+		/usr/lib/x86_64-linux-gnu/libQt5Widgets.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Gui.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Core.prl
 	$(QMAKE) -o Makefile demo.pro
@@ -313,6 +321,7 @@ Makefile: demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /u
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf:
+/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/uic.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qmake_use.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/file_copies.prf:
@@ -321,6 +330,8 @@ Makefile: demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /u
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf:
 demo.pro:
+/usr/lib/x86_64-linux-gnu/libQt5OpenGL.prl:
+/usr/lib/x86_64-linux-gnu/libQt5Widgets.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Gui.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Core.prl:
 qmake: FORCE
@@ -338,8 +349,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents camera.h glWidget.h objmodel.h planet.h texture.h utils.h vector3f.h vertexData.h Window.h $(DISTDIR)/
-	$(COPY_FILE) --parents camera.cpp glwidget.cpp main.cpp objmodel.cpp planet.cpp texture.cpp utils.cpp vector3f.cpp vertexData.cpp Window.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents camera.h glWidget.h objmodel.h planet.h skybox.h texture.h utils.h vector3f.h vertexData.h Window.h $(DISTDIR)/
+	$(COPY_FILE) --parents camera.cpp glwidget.cpp main.cpp objmodel.cpp planet.cpp skybox.cpp texture.cpp utils.cpp vector3f.cpp vertexData.cpp Window.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -369,7 +380,7 @@ compiler_moc_predefs_make_all: moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) moc_predefs.h
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
-	g++ -pipe -O2 -Wall -W -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
+	g++ -pipe -O2 -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
 compiler_moc_header_make_all: moc_glWidget.cpp
 compiler_moc_header_clean:
@@ -377,13 +388,17 @@ compiler_moc_header_clean:
 moc_glWidget.cpp: camera.h \
 		vector3f.h \
 		planet.h \
+		skybox.h \
+		texture.h \
 		glWidget.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I'/home/ubuntu/Desktop/demo 2/demo' -I'/home/ubuntu/Desktop/demo 2/demo' -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I'/home/ubuntu/Desktop/demo 2/demo' -I'/home/ubuntu/Desktop/demo 2/demo' -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
+compiler_uic_make_all:
+compiler_uic_clean:
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
@@ -402,22 +417,20 @@ glwidget.o: glwidget.cpp glWidget.h \
 		camera.h \
 		vector3f.h \
 		planet.h \
-		Window.h \
+		skybox.h \
+		texture.h \
 		objmodel.h \
 		vertexData.h \
-		texture.h \
 		utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cpp
 
-main.o: main.cpp glWidget.h \
+main.o: main.cpp Window.h \
+		glWidget.h \
 		camera.h \
 		vector3f.h \
 		planet.h \
-		Window.h \
-		objmodel.h \
-		vertexData.h \
-		texture.h \
-		utils.h
+		skybox.h \
+		texture.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 objmodel.o: objmodel.cpp objmodel.h \
@@ -425,15 +438,15 @@ objmodel.o: objmodel.cpp objmodel.h \
 		utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o objmodel.o objmodel.cpp
 
-planet.o: planet.cpp planet.h
+planet.o: planet.cpp planet.h \
+		texture.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o planet.o planet.cpp
 
+skybox.o: skybox.cpp skybox.h \
+		texture.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o skybox.o skybox.cpp
+
 texture.o: texture.cpp texture.h \
-		Window.h \
-		glWidget.h \
-		camera.h \
-		vector3f.h \
-		planet.h \
 		utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o texture.o texture.cpp
 
@@ -446,15 +459,16 @@ vector3f.o: vector3f.cpp vector3f.h
 vertexData.o: vertexData.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o vertexData.o vertexData.cpp
 
-Window.o: Window.cpp Window.h \
-		glWidget.h \
+Window.o: Window.cpp glWidget.h \
 		camera.h \
 		vector3f.h \
 		planet.h \
+		skybox.h \
+		texture.h \
 		objmodel.h \
 		vertexData.h \
-		texture.h \
-		utils.h
+		utils.h \
+		Window.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Window.o Window.cpp
 
 moc_glWidget.o: moc_glWidget.cpp 

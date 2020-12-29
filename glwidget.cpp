@@ -2,7 +2,6 @@
 #include <QtWidgets>
 #include <QGLWidget>
 #include "glWidget.h"
-#include "Window.h"
 #include "objmodel.h"
 #include "texture.h"
 #include "utils.h"
@@ -10,6 +9,7 @@
 #include "math.h"
 #include "camera.h"
 #include <time.h> 
+#include "skybox.h"
 
 const static GLfloat normals[][3] = { {1., 0. ,0.}, {-1., 0., 0.}, {0., 0., 1.}, {0., 0., -1.}, {0, 1, 0}, {0, -1, 0} };
 
@@ -42,10 +42,10 @@ glWidget::glWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent),  _angle(0.0)
 {
 
-     m_timer = new QTimer();
-
-     connect(m_timer,SIGNAL(timeout()),this, SLOT(update()));
-
+	m_timer = new QTimer();
+	
+	// Connect the time and signal slot, and update the image position every certain time
+	connect(m_timer,SIGNAL(timeout()),this, SLOT(update()));
 
 }
 
@@ -54,12 +54,13 @@ glWidget::~glWidget()
 
 }
 
+// This is a time conversion function
 unsigned int timeGetTime()
 {
 	unsigned int uptime = 0;
 	struct timespec on;
 	if(clock_gettime(CLOCK_MONOTONIC, &on) == 0)
-	uptime = on.tv_sec*1000 + on.tv_nsec/1000000;
+		uptime = on.tv_sec*1000 + on.tv_nsec/1000000;
 	return uptime;
 }
 
@@ -72,16 +73,19 @@ void glWidget::initializeGL()
 
 	string texturePath= "extra/earthmap2k.jpg";
 	string sunTexturePath = "extra/sun.bmp";
+
 	m_earth = new planet ( point(0.0,0.0,15.0),  point(0.0,1.0,0.0), 3.0, 30.0, 30.0, true, texturePath.c_str());
 	m_sun = new planet ( point(0.0,0.0,0.0),  point(1.0,0.0,0.0), 5.0, 30.0, 0.0, true, sunTexturePath.c_str());
 	m_sun->add_secondary(m_earth);
+
+	// Initializes the sky box
+	skybox.Init("extra/skybox");
 
 
 }
 
 void glWidget::setMoveLeft(int value)
 {
-
 	camera.mbMoveLeft = true;
 	camera.translateX = value;
 
@@ -107,8 +111,11 @@ void glWidget::paintGL()
 	float timeElapse = currentTime - sTimeSinceStartUp; //经历了多少时间
 	sTimeSinceStartUp = currentTime;
 
+
 	camera.Update(timeElapse); // 0.01q6f
 
+	// Right after the camera, we need to draw the sky box!
+	skybox.Draw(camera.mPos.x, camera.mPos.y, camera.mPos.z);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
